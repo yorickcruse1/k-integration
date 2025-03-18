@@ -7,10 +7,8 @@ const db = new sqlite3.Database(dbPath);
 console.log('Database path:', dbPath);
 
 db.serialize(() => {
-  // Drop and create the tokens table
-  db.run(`DROP TABLE IF EXISTS tokens`);
 
-  db.run(`CREATE TABLE tokens (
+  db.run(`CREATE TABLE IF NOT EXISTS tokens (
     id INTEGER PRIMARY KEY,
     access_token TEXT,
     token_type TEXT,
