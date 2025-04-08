@@ -24,20 +24,24 @@ db.serialize(() => {
     }
   });
 
-  // Create the sales table
+  // Create sales table
   db.run(`CREATE TABLE IF NOT EXISTS sales (
     id INTEGER PRIMARY KEY,
-    account_reference TEXT,
-    account_fisc_id TEXT,
-    receipt_id TEXT,
-    time_of_opening TEXT,
-    time_closed TEXT,
-    table_name TEXT,
+    accountReference TEXT,
+    accountFiscId TEXT,
+    receiptId TEXT,
+    initialAccountId TEXT,
+    timeOfOpening TEXT,
+    timeClosed TEXT,
+    tableName TEXT,
+    accountProfileCode TEXT,
+    ownerName TEXT,
+    ownerId INTEGER,
     type TEXT,
-    nb_covers REAL,
-    dine_in BOOLEAN,
-    device_id INTEGER,
-    device_name TEXT
+    nbCovers REAL,
+    dineIn BOOLEAN,
+    deviceId INTEGER,
+    deviceName TEXT
   )`, (err) => {
     if (err) {
       console.error('Error creating sales table:', err);
@@ -46,30 +50,38 @@ db.serialize(() => {
     }
   });
 
-  // Create the sales_lines table
-  db.run(`CREATE TABLE IF NOT EXISTS sales_lines (
+  // Create sales_lines table
+  db.run(`CREATE TABLE IF NOT EXISTS salesLines (
     id INTEGER PRIMARY KEY,
-    sale_id INTEGER,
-    item_name TEXT,
-    total_net_amount REAL,
-    menu_list_price REAL,
-    unit_cost_price REAL,
-    service_charge REAL,
-    discount_amount REAL,
-    tax_rate_percentage REAL,
-    account_discount_amount REAL,
-    total_discount_amount REAL,
-    sku TEXT,
+    saleId INTEGER,
+    lineId TEXT,
+    totalNetAmountWithTax REAL,
+    totalNetAmountWithoutTax REAL,
+    menuListPrice REAL,
+    serviceCharge REAL,
+    discountAmount REAL,
+    taxCode TEXT,
+    taxAmount REAL,
+    taxRatePercentage REAL,
+    accountDiscountAmount REAL,
+    totalDiscountAmount REAL,
     quantity REAL,
-    accounting_group_id INTEGER,
-    accounting_group_name TEXT,
-    accounting_group_code TEXT,
+    accountingGroupId INTEGER,
+    accountingGroupName TEXT,
+    accountingGroupCode TEXT,
     currency TEXT,
-    time_of_sale TEXT,
-    FOREIGN KEY (sale_id) REFERENCES sales (id)
+    revenueCenter TEXT,
+    revenueCenterId INTEGER,
+    timeOfSale TEXT,
+    staffId INTEGER,
+    staffName TEXT,
+    deviceId INTEGER,
+    deviceName TEXT,
+    accountProfileCode TEXT,
+    FOREIGN KEY (saleId) REFERENCES sales (id)
   )`, (err) => {
     if (err) {
-      console.error('Error creating sales_lines table:', err);
+      console.error('Error creating sales lines table:', err);
     } else {
       console.log('Sales lines table created successfully.');
     }
@@ -125,18 +137,21 @@ function insertSalesData(salesData) {
   return new Promise((resolve, reject) => {
     const salesStmt = db.prepare(`
       INSERT INTO sales (
-        account_reference, account_fisc_id, receipt_id, time_of_opening,
-        time_closed, table_name, type, nb_covers, dine_in, device_id, device_name
-      ) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
+        accountReference, accountFiscId, receiptId, initialAccountId,
+        timeOfOpening, timeClosed, tableName, accountProfileCode,
+        ownerName, ownerId, type, nbCovers, dineIn, deviceId, deviceName
+      ) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
     `);
 
     const linesStmt = db.prepare(`
-      INSERT INTO sales_lines (
-        sale_id, item_name, total_net_amount, menu_list_price, unit_cost_price,
-        service_charge, discount_amount, tax_rate_percentage, account_discount_amount,
-        total_discount_amount, sku, quantity, accounting_group_id, accounting_group_name,
-        accounting_group_code, currency, time_of_sale
-      ) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
+      INSERT INTO salesLines (
+        saleId, lineId, totalNetAmountWithTax, totalNetAmountWithoutTax,
+        menuListPrice, serviceCharge, discountAmount, taxCode, taxAmount,
+        taxRatePercentage, accountDiscountAmount, totalDiscountAmount,
+        quantity, accountingGroupId, accountingGroupName, accountingGroupCode,
+        currency, revenueCenter, revenueCenterId, timeOfSale, staffId,
+        staffName, deviceId, deviceName, accountProfileCode
+      ) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
     `);
 
     salesData.forEach((sale) => {
