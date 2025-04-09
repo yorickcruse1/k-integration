@@ -1,6 +1,6 @@
 const express = require('express');
 const { AuthorizationCode } = require('simple-oauth2');
-const { persistAccessTokenJSON, getPersistedAccessTokenJSON } = require('../db');
+const { persistAccessTokenJSON, getPersistedAccessTokenJSON } = require('./db');
 const dotenv = require('dotenv');
 
 // Load environment variables from .env file
